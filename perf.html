@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Chess vs Vanilla JS | Completion time</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
+	<meta charset="utf-8" />
+	<style type="text/css">
+		body {
+			align-items: center;
+			display: flex;
+			font-family: sans-serif;
+			font-size: 0.9em;
+			justify-content: center;
+			margin: 0;
+			min-height: 100vh;
+		}
+		article { 
+			max-width: 500px;
+			padding: 4px;
+		}
+		#time-benchmarks > div {
+			align-items: center;
+			display: grid;
+			grid-gap: 4px;
+			grid-template-columns: 175px auto;
+			margin-bottom: 4px;
+		}
+		#time-benchmarks p { margin: 4px 8px; }
+		.button {
+			align-items: center;
+			border-radius: 4px;
+			border: none;
+			color: #333;
+			display: flex;
+			justify-content: center;
+			padding: 8px;
+		}
+		.button-van { background-color: #F0DB4F; }
+		.button-che { background-color: #29f; }
+		.title { margin: 0; }
+		span { font-weight: bold; }
+	</style>
+</head>
+<body>
+	<article>
+		<h1>Chess vs Vanilla JS | Completion time</h1>
+		<p>Comment : Most of the time - not always - Vanilla JS is indeed more efficient than Chess, but <strong>their respective performances are always very close</strong>.</p>
+		<div id="time-benchmarks"></div>
+		<p>Note : This test uses <code>performance.now();</code> to compare results through 10 iterations. <strong>It does not work well with Firefox</strong> because Firefox rounds decimal values returned by performance.now() to integers.</p>
+		<p>Press F5 to restart the evaluation over and over.</p>
+	</article>
+	<script src="./chess.js"></script>
+	<script type="text/javascript">
+
+		// Compare the performances of the two methods through 10 iterations.
+		let benchmarksCt = document.getElementById('time-benchmarks');
+
+		for(let i = 1; i <= 10; i++) {
+
+			let containerElm = document.createElement('div');
+
+			// >>> 1. Start measuring benchmark work described with Vanilla JS.
+			
+			let startV = performance.now();
+
+			var buttonElm = document.createElement('button');
+			buttonElm.id = 'button-V' + i;
+			buttonElm.classList.add('button', 'button-van');
+			buttonElm.addEventListener('click', function(e) {
+				console.info('The ' + e.target + ' V n°' + i + ' was clicked.');
+			});
+
+			var titleElm = document.createElement('h4');
+			titleElm.classList.add('title', 'title-van');
+			titleElm.textContent = 'V' + i;
+
+			var paraElm = document.createElement('p');
+			paraElm.textContent = 'created by ';
+
+			var spanElm = document.createElement('span');
+			spanElm.textContent = 'Vanilla';
+
+			buttonElm.appendChild(titleElm);
+			paraElm.appendChild(spanElm)
+			buttonElm.appendChild(paraElm);
+			containerElm.appendChild(buttonElm);
+
+			let endV = performance.now();
+			// End.
+
+			// >>> 2. Start measuring benchmark work described with CHESS.
+
+			let startC = performance.now();
+
+			containerElm.appendChild(
+				chess(
+					{
+						type: 'button',
+						attributes: {
+							id: 'button-C' + i,
+							class: 'button button-che'
+						},
+						event: {
+							type: 'click',
+							callback: function(e) {
+								console.info('The ' + e.target + ' C n°' + i + ' was clicked.');
+							} 
+						},
+						children: [	
+							{
+								type: 'h4',
+								text: 'C' + i,
+								attributes: {
+									class: 'title title-che'
+								}
+							},
+							{
+								type: 'p',
+								text: 'created by ',
+								children:[
+									{
+										type: 'span',
+										text: 'Chess'
+									}
+								]
+							},
+						]
+					}
+				)
+			);
+
+			let endC = performance.now();
+			// End.
+
+			benchmarksCt.appendChild(containerElm);
+
+			// >>> 3. Compare and print results.
+
+			let resultV = (endV - startV).toFixed(3);
+			let resultC = (endC - startC).toFixed(3);
+
+			let currentResultElm = document.createElement('p');
+			currentResultElm.classList.add('line-result');
+
+			if(resultV < resultC) {
+				currentResultElm.textContent = '≃ ' + (resultC - resultV).toFixed(3) + 'ms faster than Chess';
+				document.getElementById('button-C' + i).remove();
+			}
+			else if(resultV > resultC) {
+				currentResultElm.textContent = '≃ ' + (resultV - resultC).toFixed(3) + 'ms faster than Vanilla';
+				document.getElementById('button-V' + i).remove();
+			}
+			else {
+				currentResultElm.textContent = 'Equality !';
+				document.getElementById('button-V' + i).remove();
+				document.getElementById('button-C' + i).remove();
+			}
+
+			containerElm.appendChild(currentResultElm);
+
+		}
+
+	</script>
+</body>
+</html>
